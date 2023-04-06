@@ -15,6 +15,7 @@ class TaskList: Object {
     @Persisted var tasks = List<Task>()
 }
 
+
 class Task: Object {
     @Persisted var title = ""
     @Persisted var note = ""
