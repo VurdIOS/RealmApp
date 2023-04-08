@@ -73,7 +73,7 @@ class StorageManager {
     
     func done(_ task: Task) {
         write {
-            task.isComplete = true
+            task.isComplete = task.isComplete ? false : true
         }
     }
     

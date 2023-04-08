@@ -13,7 +13,7 @@ final class TaskListViewController: UITableViewController {
 
     private var taskLists: Results<TaskList>!
     private let storageManager = StorageManager.shared
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
         let addButton = UIBarButtonItem(
@@ -21,7 +21,7 @@ final class TaskListViewController: UITableViewController {
             target: self,
             action: #selector(addButtonPressed)
         )
-        
+ 
         navigationItem.rightBarButtonItem = addButton
         navigationItem.leftBarButtonItem = editButtonItem
         taskLists = storageManager.realm.objects(TaskList.self)
@@ -43,9 +43,24 @@ final class TaskListViewController: UITableViewController {
         var content = cell.defaultContentConfiguration()
         let taskList = taskLists[indexPath.row]
         content.text = taskList.title
-        content.secondaryText = taskList.tasks.count.formatted()
+        content.secondaryText = setSecondaryText(taskList)
         cell.contentConfiguration = content
+        
         return cell
+    }
+    
+    private func setSecondaryText(_ with: TaskList) -> String {
+        let tasks = with.tasks
+        let current = tasks.filter("isComplete = false")
+        let completed = tasks.filter("isComplete = true")
+        if current.count == 0, completed.count == 0 {
+            return "0"
+        } else if current.count > 0 {
+            return current.count.formatted()
+        } else {
+            
+            return "✔️"
+        }
     }
     
     // MARK: - Table View Data Source
@@ -85,6 +100,11 @@ final class TaskListViewController: UITableViewController {
     }
 
     @IBAction func sortingList(_ sender: UISegmentedControl) {
+        taskLists = sender.selectedSegmentIndex == 0
+        ? taskLists.sorted(byKeyPath: "date", ascending: false)
+        : taskLists.sorted(byKeyPath: "title", ascending: true)
+        tableView.reloadData()
+        
     }
     
     @objc private func addButtonPressed() {

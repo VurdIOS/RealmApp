@@ -31,6 +31,8 @@ class TasksViewController: UITableViewController {
         completedTasks = taskList.tasks.filter("isComplete = true")
     }
     
+    
+    
     // MARK: - Table view data source
     override func numberOfSections(in tableView: UITableView) -> Int {
         2
@@ -47,7 +49,11 @@ class TasksViewController: UITableViewController {
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TasksCell", for: indexPath)
         var content = cell.defaultContentConfiguration()
-        let task = indexPath.section == 0 ? currentTasks[indexPath.row] : completedTasks[indexPath.row]
+        
+        let task = indexPath.section == 0
+        ? currentTasks[indexPath.row]
+        : completedTasks[indexPath.row]
+        
         content.text = task.title
         content.secondaryText = task.note
         cell.contentConfiguration = content
@@ -59,7 +65,9 @@ class TasksViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, trailingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
-        let task = taskList.tasks[indexPath.row]
+        let task = indexPath.section == 0
+        ? currentTasks[indexPath.row]
+        : completedTasks[indexPath.row]
         
         let deleteAction = UIContextualAction(style: .destructive, title: "Delete") { [unowned self] _, _, _ in
             storageManager.delete(task)
@@ -75,10 +83,15 @@ class TasksViewController: UITableViewController {
         
         let doneAction = UIContextualAction(style: .normal, title: "Done") { [unowned self] _, _, isDone in
             storageManager.done(task)
-            tableView.reloadData()
+            let currentTasksIndex = IndexPath(row: currentTasks.count - 1, section: 0)
+            let completedTasksIndex = IndexPath(row: completedTasks.count - 1, section: 1)
+            let index = indexPath.section == 0 ? completedTasksIndex : currentTasksIndex
+            tableView.moveRow(at: indexPath, to: index )
             isDone(true)
         }
         
+        editAction.backgroundColor = .orange
+        doneAction.backgroundColor = #colorLiteral(red: 0.3411764801, green: 0.6235294342, blue: 0.1686274558, alpha: 1)
         
         
         return UISwipeActionsConfiguration(actions: [deleteAction, editAction, doneAction])
